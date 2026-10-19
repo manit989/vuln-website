@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tinyfah Vulnerability Testbed | OWASP ASVS 5.0.0 Target</title>
+  <meta name="description" content="Interactive vulnerable web application designed for automated security testing against all 17 OWASP ASVS 5.0.0 chapters.">
+
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- External CDN Asset without Subresource Integrity (ASVS V3.1.1) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Intentionally omit strict Content-Security-Policy & HSTS headers (ASVS V3.4.1, V3.4.2) -->
+</head>
+<body>
+
+  <!--
+    DEVELOPER COMMENT WITH HARDCODED SENSITIVE SECRETS (ASVS V14.3.1, V15.3.1)
+    TODO: Remove before pushing to production!
+    Master Admin: admin@tinyfah-corp.internal / P@ssw0rd2026!
+    Production Database URI: postgres://dbadmin:SuperSecretK3y@10.0.1.45:5432/core_prod
+    AWS S3 Bucket: s3://tinyfah-internal-customer-backups-2026/
+  -->
+
+  <div class="container">
+    <!-- Hero Header -->
+    <header class="hero">
+      <div class="badge-pill">
+        <span class="badge-dot"></span>
+        Target Testbed &bull; OWASP ASVS 5.0.0
+      </div>
+      <h1>Interactive Security <span>Vulnerability Testbed</span></h1>
+      <p>
+        A multi-vector web application purposefully engineered with realistic vulnerabilities
+        across all 17 OWASP ASVS chapters for rigorous AI agent and scanner verification.
+      </p>
+
+      <div class="hero-stats">
+        <div class="stat-item">
+          <span class="stat-num">17</span>
+          <span class="stat-label">ASVS Chapters</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-num">345</span>
+          <span class="stat-label">Requirements</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-num">V1 - V17</span>
+          <span class="stat-label">Coverage Vectors</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Vulnerability Grid -->
+    <main class="grid">
+
+      <!-- ==================================================================
+           1. CHAPTER V1: Output Encoding & Canary Injection
+           ================================================================== -->
+      <section class="card" id="card-v1" style="--card-accent: #f43f5e;">
+        <div class="card-header">
+          <div class="card-title-group">
+            <div class="card-icon" style="color: #fb7185;"><i class="fa-solid fa-code"></i></div>
+            <h2 class="card-title">Output Encoding & Canary Reflection</h2>
+          </div>
+          <span class="asvs-tag">V1.2.1 / V1.3.7</span>
+        </div>
+        <p class="card-desc">
+          Unescaped parameter reflection into the DOM and simulated server-side template injection (SSTI).
+        </p>
+
+        <!-- Dynamic Reflection Sink (XSS Canary) -->
+        <div class="form-group">
+          <label class="form-label" for="search-input">Search Parameter Sink (?q=)</label>
+          <form method="GET" action="" style="display: flex; gap: 0.5rem;">
+            <input type="text" id="search-input" name="q" class="input-field" placeholder="Try <tinyfah-canary-test> or {{7*7}}">
+            <button type="submit" class="btn btn-primary" id="btn-submit-q">Probe</button>
+          </form>
+        </div>
+
+        <div class="form-label" style="margin-top: 0.5rem;">Dynamic DOM Reflection Sink (innerHTML):</div>
+        <div id="reflection-output" class="reflection-sink">
+          Loading query parameter...
+        </div>
+
+        <div class="form-label" style="margin-top: 0.75rem;">Template Injection Sink (?template=):</div>
+        <div id="template-output" class="reflection-sink" style="border-color: rgba(99, 102, 241, 0.4); color: #c7d2fe;">
+          Loading template parameter...
+        </div>
+
+        <!-- Dangerous URL Scheme Link (ASVS V1.4.1) -->
+        <div style="margin-top: 1rem;">
+          <a href="javascript:alert('Tinyfah XSS Demonstration')" class="test-link" id="link-javascript-scheme">
+            <i class="fa-solid fa-triangle-exclamation"></i> Insecure <code>javascript:</code> Pseudo-Protocol Link
+          </a>
+        </div>
+        <div class="vuln-badge">V1 Flaw: Raw unencoded reflection & executable template sinks</div>
+      </section>
+
+      <!-- ==================================================================
+           2. CHAPTER V6 & V12: Authentication & Insecure Transport
+           ================================================================== -->
+      <section class="card" id="card-v6" style="--card-accent: #f59e0b;">
+        <div class="card-header">
+          <div class="card-title-group">
+            <div class="card-icon" style="color: #fbbf24;"><i class="fa-solid fa-lock"></i></div>
+            <h2 class="card-title">Authentication Transport & Forms</h2>
+          </div>
+          <span class="asvs-tag">V6.1.1 / V12.2.1</span>
+        </div>
+        <p class="card-desc">
+          Authentication credentials submitted over unencrypted cleartext HTTP endpoint with improper autocomplete flags.
+        </p>
+
+        <!-- Insecure Login Form posting over plaintext HTTP -->
+        <form action="http://insecure-auth-gateway.internal/api/login" method="POST" id="insecure-login-form">
+          <div class="form-group">
+            <label class="form-label" for="login-username">Username or Email</label>
+            <input type="text" id="login-username" name="username" class="input-field" value="admin@tinyfah.internal">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="login-password">Password</label>
+            <input type="password" id="login-password" name="password" class="input-field" value="SuperSecretPassword2026!" autocomplete="off">
+          </div>
+          <button type="submit" class="btn btn-danger" style="width: 100%;" id="btn-submit-login">
+            Submit Credentials (Cleartext HTTP Action)
+          </button>
+        </form>
+
+        <!-- Sensitive Token in URL Query Parameter (ASVS V6.3.1, V9.1.1) -->
+        <div style="margin-top: 1rem;">
+          <a href="?password=P%40ssw0rd123&token=eyJhbGciOiJub25lIn0" class="test-link" id="link-leak-credentials">
+            <i class="fa-solid fa-key"></i> Link Leaking Credentials in URL Query String (?password=...)
+          </a>
+        </div>
+        <div class="vuln-badge">V6/V12 Flaw: Plaintext HTTP credential submission & URL query leakage</div>
+      </section>
+
+      <!-- ==================================================================
+           3. CHAPTER V7 & V9: Session Management & Web Storage
+           ================================================================== -->
+      <section class="card" id="card-v7" style="--card-accent: #8b5cf6;">
+        <div class="card-header">
+          <div class="card-title-group">
+            <div class="card-icon" style="color: #a78bfa;"><i class="fa-solid fa-cookie-bite"></i></div>
+            <h2 class="card-title">Session Storage & Cookie Attributes</h2>
+          </div>
+          <span class="asvs-tag">V7.1.1 / V7.2.2</span>
+        </div>
+        <p class="card-desc">
+          Session identifiers stored in insecure cookies lacking Secure/HttpOnly flags and exposed unencrypted in WebStorage.
+        </p>
+
+        <div class="terminal-box">
+          <div class="terminal-header">
+            <span>INSECURE CLIENT-SIDE COOKIES &amp; STORAGE</span>
+            <div class="terminal-dots">
+              <span class="t-dot t-red"></span>
+              <span class="t-dot t-yellow"></span>
+              <span class="t-dot t-green"></span>
+            </div>
+          </div>
+          <div>document.cookie = <span class="vulnerable-output">"session_id=sess_9938472918471928; path=/"</span>;</div>
+          <div style="color: var(--text-muted); font-size: 0.75rem;">// Flags missing: Secure, HttpOnly, SameSite</div>
+          <br>
+          <div>localStorage.setItem(<span class="vulnerable-output">"auth_token", "eyJhbGciOiJub25l..."</span>);</div>
+          <div>localStorage.setItem(<span class="vulnerable-output">"api_secret_key", "sec_live_994829..."</span>);</div>
+        </div>
+
+        <div class="vuln-badge">V7/V9 Flaw: Unencrypted JWT in localStorage & cookie missing Secure flag</div>
+      </section>
+
+      <!-- ==================================================================
+           4. CHAPTER V3 & V15: Client DOM Integrity & Legacy Libraries
+           ================================================================== -->
+      <section class="card" id="card-v3" style="--card-accent: #06b6d4;">
+        <div class="card-header">
+          <div class="card-title-group">
+            <div class="card-icon" style="color: #22d3ee;"><i class="fa-solid fa-window-restore"></i></div>
+            <h2 class="card-title">DOM Integrity & Library Signatures</h2>
+          </div>
+          <span class="asvs-tag">V3.1.1 / V15.2.1</span>
+        </div>
+        <p class="card-desc">
+          External assets without Subresource Integrity (SRI), unsafe tabnabbing links, and outdated client JS libraries.
+        </p>
+
+        <!-- External link missing rel="noopener noreferrer" -->
+        <div class="form-group">
+          <label class="form-label">Reverse Tabnabbing Vulnerability:</label>
+          <a href="https://example.com" target="_blank" class="test-link" id="link-target-blank-unsafe">
+            External Link (target="_blank" without rel="noopener") <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          </a>
+        </div>
+
+        <div class="terminal-box">
+          <div class="terminal-header">
+            <span>DETECTED CLIENT-SIDE DEPENDENCIES</span>
+          </div>
+          <div>window.jQuery.fn.jquery: <span class="vulnerable-output">"1.12.4"</span> (Known CVEs)</div>
+          <div>window.React.version: <span class="vulnerable-output">"16.8.0"</span></div>
+          <div>window.Vue.version: <span class="vulnerable-output">"2.5.17"</span></div>
+          <div>window._.VERSION: <span class="vulnerable-output">"4.17.11"</span> (Prototype Pollution)</div>
+        </div>
+
+        <div class="vuln-badge">V3/V15 Flaw: Missing SRI, tabnabbing & vulnerable jQuery / Lodash</div>
+      </section>
+
+      <!-- ==================================================================
+           5. CHAPTER V4 & V13: API Services, CORS & Headers
+           ================================================================== -->
+      <section class="card" id="card-v4" style="--card-accent: #10b981;">
+        <div class="card-header">
+          <div class="card-title-group">
+            <div class="card-icon" style="color: #34d399;"><i class="fa-solid fa-server"></i></div>
+            <h2 class="card-title">API Architecture & Exposed Docs</h2>
+          </div>
+          <span class="asvs-tag">V4.3.1 / V13.1.1</span>
+        </div>
+        <p class="card-desc">
+          Missing defense-in-depth headers (X-Content-Type-Options: nosniff), permissive CORS, and public API specs.
+        </p>
+
+        <div class="terminal-box">
+          <div class="terminal-header">
+            <span>SERVER RESPONSE HEADERS (SIMULATED)</span>
+          </div>
+          <div>Server: <span class="vulnerable-output">Apache/2.4.41 (Ubuntu) mod_ssl/2.4.41</span></div>
+          <div>X-Powered-By: <span class="vulnerable-output">PHP/7.4.3</span></div>
+          <div>Access-Control-Allow-Origin: <span class="vulnerable-output">*</span></div>
+          <div>Access-Control-Allow-Credentials: <span class="vulnerable-output">true</span></div>
+          <div>X-Content-Type-Options: <span style="color: #fca5a5;">(HEADER MISSING - MIME SNIFF RISK)</span></div>
+        </div>
+
+        <div style="margin-top: 1rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+          <a href="/openapi.json" class="test-link" id="link-openapi"><i class="fa-solid fa-file-code"></i> /openapi.json</a>
+          <a href="/swagger.json" class="test-link" id="link-swagger"><i class="fa-solid fa-file-code"></i> /swagger.json</a>
+          <a href="/graphql" class="test-link" id="link-graphql"><i class="fa-solid fa-diagram-project"></i> /graphql (Introspection)</a>
+        </div>
+        <div class="vuln-badge">V4/V13 Flaw: Wildcard CORS with credentials & server version disclosure</div>
+      </section>
+
+      <!-- ==================================================================
+           6. CHAPTER V5: Unrestricted File Upload
+           ================================================================== -->
+      <section class="card" id="card-v5" style="--card-accent: #ec4899;">
+        <div class="card-header">
+          <div class="card-title-group">
+            <div class="card-icon" style="color: #f472b6;"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+            <h2 class="card-title">Unrestricted File Upload</h2>
+          </div>
+          <span class="asvs-tag">V5.1.1 / V5.2.1</span>
+        </div>
+        <p class="card-desc">
+          File handling interface accepting arbitrary file extensions (.php, .sh, .exe) with zero validation.
+        </p>
+
+        <form id="file-upload-form" style="display: flex; flex-direction: column; gap: 0.75rem;">
+          <input type="file" id="file-input" class="input-field" style="padding: 0.5rem;">
+          <button type="submit" class="btn btn-primary" id="btn-upload-file">
+            <i class="fa-solid fa-upload"></i> Upload Unchecked File
+          </button>
+        </form>
+        <div id="upload-status" style="margin-top: 0.75rem; font-size: 0.85rem; font-family: var(--font-mono);"></div>
+
+        <div class="vuln-badge">V5 Flaw: No file extension allowlist or magic byte verification</div>
+      </section>
+
+      <!-- ==================================================================
+           7. CHAPTER V8 & V10: IDOR Authorization & OAuth Flaws
+           ================================================================== -->
+      <section class="card" id="card-v8" style="--card-accent: #6366f1;">
+        <div class="card-header">
+          <div class="card-title-group">
+            <div class="card-icon" style="color: #818cf8;"><i class="fa-solid fa-shield-halved"></i></div>
+            <h2 class="card-title">IDOR &amp; Insecure OAuth Grants</h2>
+          </div>
+          <span class="asvs-tag">V8.1.1 / V10.2.1</span>
+        </div>
+        <p class="card-desc">
+          Insecure Direct Object Reference via client-controlled URL parameters and OAuth links missing state/PKCE.
+        </p>
+
+        <div id="role-display" style="padding: 0.75rem; background: rgba(0,0,0,0.3); border-radius: 6px; font-size: 0.85rem; font-family: var(--font-mono); margin-bottom: 1rem;">
+          Evaluating role...
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">OAuth 2.0 Insecure Authorization Link:</label>
+          <a href="https://auth.example.com/oauth/authorize?client_id=tinyfah_app&redirect_uri=http://localhost:3000/callback&response_type=token" class="test-link" id="link-insecure-oauth">
+            <i class="fa-brands fa-openid"></i> Insecure OAuth Flow (Missing state &amp; PKCE verifier)
+          </a>
+        </div>
+
+        <div class="vuln-badge">V8/V10 Flaw: Client-side role elevation & CSRF in OAuth redirect</div>
+      </section>
+
+      <!-- ==================================================================
+           8. CHAPTER V16 & V17: Verbose Error Disclosure & WebRTC
+           ================================================================== -->
+      <section class="card" id="card-v16" style="--card-accent: #ef4444;">
+        <div class="card-header">
+          <div class="card-title-group">
+            <div class="card-icon" style="color: #f87171;"><i class="fa-solid fa-bug"></i></div>
+            <h2 class="card-title">Verbose Errors &amp; WebRTC Leaks</h2>
+          </div>
+          <span class="asvs-tag">V16.1.1 / V17.1.1</span>
+        </div>
+        <p class="card-desc">
+          Internal stack trace and database query error messages exposed in responses and console logs.
+        </p>
+
+        <div class="terminal-box" style="border-color: rgba(239, 68, 68, 0.4);">
+          <div class="terminal-header" style="color: #fca5a5;">
+            <span>EXPOSED DATABASE ERROR &amp; TRACEBACK</span>
+          </div>
+          <div class="vulnerable-output">
+            Traceback (most recent call last):<br>
+            &nbsp;&nbsp;File "/srv/app/controllers/user_controller.py", line 104, in get_account<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;cursor.execute("SELECT * FROM users WHERE id = %s" % user_id)<br>
+            sqlite3.OperationalError: no such table: users -- exposed debug stack trace
+          </div>
+        </div>
+
+        <div style="margin-top: 1rem;">
+          <span style="font-size: 0.8rem; color: var(--text-muted);">
+            <i class="fa-solid fa-satellite-dish"></i> WebRTC RTCPeerConnection active: IP candidate discovery probe listening.
+          </span>
+        </div>
+
+        <div class="vuln-badge">V16/V17 Flaw: Raw SQL error stack trace & unconstrained WebRTC STUN probe</div>
+      </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer>
+      <p>
+        <strong>Tinyfah Security Testbed</strong> &bull; Intentionally Vulnerable Web Application for OWASP ASVS 5.0.0 Evaluation.
+      </p>
+      <p style="margin-top: 0.5rem; color: #64748b;">
+        Deployable directly to <strong>Vercel</strong> or any static hosting platform.
+      </p>
+    </footer>
+  </div>
+
+  <!-- Main interactive testbed script -->
+  <script src="app.js"></script>
+</body>
+</html>

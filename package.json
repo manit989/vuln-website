@@ -1,0 +1,12 @@
+{
+  "name": "tinyfah-asvs-vulnerable-testbed",
+  "version": "1.0.0",
+  "description": "Interactive testbed website engineered for OWASP ASVS 5.0.0 automated security agent evaluation",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve ."
+  },
+  "keywords": ["security", "asvs", "testbed", "vulnerable", "owasp"],
+  "author": "Tinyfah Team",
+  "license": "MIT"
+}

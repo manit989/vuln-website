@@ -1,0 +1,46 @@
+{
+  "version": 2,
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Server",
+          "value": "Apache/2.4.41 (Ubuntu) OpenSSL/1.1.1f"
+        },
+        {
+          "key": "X-Powered-By",
+          "value": "PHP/7.4.3"
+        },
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Credentials",
+          "value": "true"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, OPTIONS, TRACE"
+        }
+      ]
+    }
+  ],
+  "routes": [
+    {
+      "src": "/openapi.json",
+      "dest": "/openapi.json"
+    },
+    {
+      "src": "/swagger.json",
+      "dest": "/swagger.json"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ]
+}

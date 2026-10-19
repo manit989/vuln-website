@@ -1,0 +1,30 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Tinyfah Internal Testbed API",
+    "version": "1.0.0",
+    "description": "Exposed administrative API documentation demonstrating ASVS V4.1.3 and V13.2.1."
+  },
+  "paths": {
+    "/api/users": {
+      "get": {
+        "summary": "List all internal users",
+        "responses": {
+          "200": {
+            "description": "Array of user records with password hashes"
+          }
+        }
+      }
+    },
+    "/api/admin/system-backup": {
+      "post": {
+        "summary": "Trigger automated system backup",
+        "responses": {
+          "200": {
+            "description": "Backup created"
+          }
+        }
+      }
+    }
+  }
+}
