@@ -4,9 +4,22 @@
   "description": "Interactive testbed website engineered for OWASP ASVS 5.0.0 automated security agent evaluation",
   "main": "index.html",
   "scripts": {
-    "start": "npx serve ."
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
   },
-  "keywords": ["security", "asvs", "testbed", "vulnerable", "owasp"],
+  "keywords": [
+    "security",
+    "asvs",
+    "testbed",
+    "vulnerable",
+    "owasp"
+  ],
   "author": "Tinyfah Team",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "next": "^16.4.2",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  }
 }

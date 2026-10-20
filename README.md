@@ -1,77 +1,94 @@
-# 🎯 Tinyfah OWASP ASVS 5.0.0 Interactive Vulnerability Testbed
+# 🎯 Tinyfah OWASP ASVS 5.0.0 Server-Rendered Vulnerability Target
 
-An interactive, multi-vector target web application engineered with deliberate, realistic security vulnerabilities across all **17 OWASP ASVS chapters (345 requirements)**. Designed for benchmarking automated AI security agents, deterministic test harnesses, and penetration testing tools.
+A production-grade, server-rendered **Next.js** interactive target application purposefully engineered with realistic vulnerabilities across all **17 OWASP ASVS chapters (345 requirements)** and deterministic playbooks for AI security agent evaluation.
 
----
-
-## 🚀 Quick Deployment to Vercel
-
-### Option 1: Vercel CLI (Instant)
-Inside this directory:
-```bash
-npx vercel
-```
-Follow the interactive prompts (Accept defaults). Vercel will deploy this static site in under 30 seconds and provide a public HTTPS URL (e.g., `https://tinyfah-testbed.vercel.app`).
-
-### Option 2: Vercel Web Dashboard
-1. Push this directory or repo to GitHub.
-2. Go to [vercel.com/new](https://vercel.com/new) and select the repository.
-3. Set the **Root Directory** to `vulnerable-testbed`.
-4. Click **Deploy**.
+Built specifically to support non-browser probe layers (`httpx`), server-side reflection, authenticated sessions, state-changing playbooks with non-destructive canaries, and multi-step exploit chains (`register` → `login` → `escalate` → `act`).
 
 ---
 
-## 💻 Local Testing
-
-You can run this testbed locally with any static web server:
+## ⚡ Quick Start
 
 ```bash
-# Using Python
-python3 -m http.server 3000 --directory .
+# 1. Install dependencies
+npm install
 
-# Or using Node
-npx serve .
+# 2. Run local development server
+npm run dev
+
+# 3. Or run production server on port 3000
+npm run build
+npm run start -- -p 3000
 ```
 
-Open `http://127.0.0.1:3000` in your browser.
+Open `http://127.0.0.1:3000` in your browser or point your automated agent's probe runner directly at it.
 
 ---
 
-## 🛡️ ASVS Chapter Vulnerability Mapping
+## 🔍 Discovery & Recon Surface
 
-| ASVS Chapter | Vulnerability Vector Implemented | Observable Mechanism |
-| :--- | :--- | :--- |
-| **V1 (Encoding)** | Reflected XSS & SSTI | Unescaped `?q=` DOM reflection and `?template={{7*7}}` evaluation to `49`. Dangerous `javascript:` links. |
-| **V2 (Validation)** | Missing input constraints | Client-side only bypassable input fields without length or regex validation. |
-| **V3 (Frontend)** | Missing SRI & Tabnabbing | External FontAwesome CDN link without `integrity` hash; `target="_blank"` missing `rel="noopener"`. |
-| **V4 (API)** | Wildcard CORS & Specs | `Access-Control-Allow-Origin: *` with credentials; public `/openapi.json` and `/swagger.json`. |
-| **V5 (Files)** | Unchecked File Upload | Interactive upload form accepting `.php`, `.exe`, `.sh` without extension or magic-byte checks. |
-| **V6 (Auth)** | Insecure Login Transport | Form posting to `http://insecure-auth-gateway.internal/api/login`; credentials leaked in URL query parameters. |
-| **V7 (Sessions)** | Insecure Cookie Flags | Active session cookies planted without `Secure`, `HttpOnly`, or `SameSite` flags. |
-| **V8 (Authorization)** | Client-side IDOR | Privilege escalation via URL parameter: `?role=admin`. |
-| **V9 (Tokens)** | Exposed JWT | Plaintext token with `alg: "none"` stored in `localStorage` and query string. |
-| **V10 (OAuth)** | Insecure OAuth Flow | OAuth 2.0 authorization link omitting `state` CSRF token and PKCE code verifier. |
-| **V11 (Crypto)** | Weak Entropy | Token generation using pseudo-random `Math.random()`. |
-| **V12 (Transport)** | Insecure HTTP references | Plaintext form action endpoints and mixed content indicators. |
-| **V13 (Config)** | Server Version Leakage | Server headers disclosing `Apache/2.4.41 (Ubuntu)` and `PHP/7.4.3`; missing `nosniff`. |
-| **V14 (Data Protection)**| Exposed Comments | Hardcoded admin credentials and internal database URIs in HTML comments. |
-| **V15 (Coding/Architecture)**| Outdated Libraries | Exposed global window signatures for outdated `jQuery 1.12.4`, `React 16.8`, `Lodash 4.17.11`. |
-| **V16 (Error Handling)**| Verbose Stack Traces | Active console error and page element exposing raw Python/SQLite operational error tracebacks. |
-| **V17 (WebRTC)** | Local IP Discovery | Unconstrained `RTCPeerConnection` probing STUN candidate generation without user interaction. |
+The target server pre-renders discoverable endpoints and surfaces so crawler and link-graph BFS routines discover all attack surfaces over HTTP:
+
+- **Robots & Sitemap**: [`/robots.txt`](file:///home/manit/dev/projects/vulnerable-testbed/app/robots.txt/route.js), [`/sitemap.xml`](file:///home/manit/dev/projects/vulnerable-testbed/app/sitemap.xml/route.js) (disclosing `/admin`, `/dashboard`, `/debug`, `/api/admin/`)
+- **Exposed Artifacts**: `/.env` (signature `KEY=value`, `DATABASE_URL=postgres://...`), `/.git/HEAD` (`ref: refs/heads/main`)
+- **Ownership Verification**: `/.well-known/tinyfah-[token].txt` (byte-exact token output, e.g. `/.well-known/tinyfah-Yashvardhan.txt`), `<meta name="tinyfah-verify" content="Yashvardhan">`
+- **API Specs**: [`/openapi.json`](file:///home/manit/dev/projects/vulnerable-testbed/app/openapi.json/route.js) (OpenAPI 3.0.0), [`/swagger.json`](file:///home/manit/dev/projects/vulnerable-testbed/app/swagger.json/route.js) (Swagger 2.0)
+- **GraphQL**: [`/graphql`](file:///home/manit/dev/projects/vulnerable-testbed/app/graphql/route.js) (Full schema introspection enabled via `{ __schema { types { name } } }`)
+- **Diagnostic Console**: [`/debug`](file:///home/manit/dev/projects/vulnerable-testbed/app/debug/page.js) (Discloses internal subnet, environment variables, active canary logs)
 
 ---
 
-## 🤖 Testing with Tinyfah LangGraph Agent
+## 🔑 Test Accounts & Authentication
 
-Once deployed to Vercel (or running locally), test the agent against your deployment:
+Pre-configured in-memory accounts for testing authenticated access-control playbooks:
 
-```bash
-# Standalone CLI scan
-cd backend
-uv run python verify_langgraph.py https://your-testbed.vercel.app
+| Username / Email | Password | Role | Description |
+| :--- | :--- | :--- | :--- |
+| `test_user` (`test_user@tinyfah.internal`) | `test_user_pass` | `user` | Baseline standard account |
+| `test_admin` (`test_admin@tinyfah.internal`) | `test_admin_pass` | `admin` | Elevated administrative superuser |
+| `victim_ceo` (`ceo@tinyfah.internal`) | `CeoP@ssw0rd2026!` | `executive` | Target account with sensitive proprietary records |
 
-# Or trigger via API
-curl -X POST http://127.0.0.1:8000/api/scans \
-  -H "Content-Type: application/json" \
-  -d '{"url": "https://your-testbed.vercel.app", "suite": "all_standards"}'
-```
+---
+
+## 🛡️ Complete ASVS 17-Chapter Vulnerability Mapping & Playbooks
+
+| ASVS Chapter | Vector & Endpoint | Mechanism & Deterministic Verification | Canary / Output Signature |
+| :--- | :--- | :--- | :--- |
+| **V1 (Encoding / Injection)** | Server SSR `/?q=` & `/search` | Raw unescaped reflection in server-rendered body | Canary reflected in HTML |
+| **V1 (SSTI)** | `/?template={{7*7}}` | Server template engine simulation | Evaluates expression to `49` |
+| **V1 / V16 (SQL Injection)** | `GET /api/users?id='` | Unsanitized query triggering raw SQLite traceback | `sqlite3.OperationalError: unrecognized token: "'"` |
+| **V1 (SQLi Dump Bypass)** | `GET /api/users?id=' OR 1=1--` | Classic boolean SQLi bypass dumping database | `CANARY_SQLI_BYPASS_PROVEN` |
+| **V1 (Command Injection)** | `GET /api/tools/ping?host=127.0.0.1; whoami` | Shell command injection separator execution | `CANARY_COMMAND_INJECTION_PROVEN` |
+| **V1 (XXE)** | `POST /api/xml/parse` | XML parser with external entity expansion | `CANARY_XXE_ENTITY_EXPANSION_VERIFIED` |
+| **V2 (Validation)** | `POST /api/cart/checkout` | Parameter tampering (negative price/quantity) | `CANARY_BUSINESS_LOGIC_TAMPER_VERIFIED` |
+| **V3 (Frontend DOM)** | Insecure CDN in `layout.js` | FontAwesome CDN without SRI hash; tabnabbing without `rel="noopener"` | Observable in HTML attributes |
+| **V4 (API Services)** | `OPTIONS /api/users` & CORS | Wildcard origin reflection with `allow-credentials: true` | `Access-Control-Allow-Origin: *` |
+| **V4 (GraphQL)** | `POST /api/graphql` | Introspection dump revealing queries and mutations | `CANARY_GRAPHQL_SCHEMA_DUMP_VERIFIED` |
+| **V5 (File Upload)** | `POST /api/upload` | Unrestricted upload (.php, .sh, .exe) with canary response | `CANARY_FILE_UPLOADED_OK` |
+| **V5 (Path Traversal)** | `GET /api/files?name=../../etc/passwd` | Directory traversal returning simulated `/etc/passwd` | `CANARY_PATH_TRAVERSAL_CONFIRMED` |
+| **V6 (Auth Transport)** | `POST /api/auth/login` & `GET ?password=` | Credentials submitted over plaintext and query leakage | `CANARY_AUTH_LOGIN_SUCCESS` |
+| **V7 (Sessions)** | `Set-Cookie` in login response | Session cookies planted without `HttpOnly`, `Secure`, `SameSite` | `session_id=sess_...; Path=/` |
+| **V8 (Privilege Escalation)** | `GET /?role=admin` & `GET /admin?role=admin` | GET parameter privilege path returning admin markers without suppression words | `admin panel`, `dashboard`, `superuser`, `is_admin`, `sk_live_admin_bypass_9938` |
+| **V8 (IDOR)** | `GET /api/users/:id` | Direct object reference exposing secret records and CEO data | `CANARY_IDOR_PROVEN_USER_3` |
+| **V9 (Token Flaws)** | `POST /api/jwt/verify` | Accepts unsigned JWT with `alg: "none"` or weak secret | `CANARY_JWT_NONE_ALG_BYPASS_VERIFIED` |
+| **V10 (Race Conditions)** | `POST /api/coupon/apply` | Single-use coupon (`PROMO2026_ONCE`) redeemable concurrently | `CANARY_COUPON_RACE_CONDITION_VERIFIED` |
+| **V10 (Open Redirect)** | `GET /redirect?url=https://evil.com` | Unvalidated 302 HTTP redirection | `Location: https://evil.com`, `CANARY_OPEN_REDIRECT_CONFIRMED` |
+| **V11 (Crypto)** | `POST /api/auth/reset-password` | Predictable token generated via timestamp and user ID | `CANARY_PASSWORD_RESET_TRIGGERED` |
+| **V12 (Transport)** | Plaintext references & links | Cleartext HTTP links and sensitive token query strings | Leaked URL parameters |
+| **V13 (Config Disclosure)** | HTTP Server Headers | Server banners disclosing `Apache/2.4.41` and `PHP/7.4.3` | `Server: Apache/2.4.41`, `X-Powered-By: PHP/7.4.3` |
+| **V14 (Data Protection)** | HTML comments & Canaries | Production DB URIs & master admin credentials in comments | `CANARY_HARDCODED_HTML_COMMENT_TOKEN_PROVEN` |
+| **V15 (Dependencies)** | Window library signatures & Deserialization | `jQuery 1.12.4`, `React 16.8.0`, `Lodash 4.17.11`, `POST /api/deserialize` | `CANARY_DESERIALIZATION_TRIGGERED` |
+| **V16 (Error Handling)** | 500 Responses & Tracebacks | Raw stack trace disclosures on unexpected database inputs | `sqlite3.OperationalError` |
+| **V17 (SSRF & WebRTC)** | `GET /api/proxy?url=http://169.254.169.254/...` | Server-Side Request Forgery proxy resolving metadata & loopback | `CANARY_SSRF_IMPACT_CONFIRMED` |
+
+---
+
+## 🔁 Exploit Chaining & Non-Destructive State Changes
+
+1. **Exploit Chain (Register → Login → Escalate → Act)**:
+   - Stage 1: `POST /api/auth/register` (mass assign role or create test operator)
+   - Stage 2: `POST /api/auth/login` (obtain session cookie & JWT)
+   - Stage 3: `GET /admin?role=admin` (verify admin panel takeover)
+   - Stage 4: `PUT /api/user/profile` (update display name, returning `CANARY_PROFILE_UPDATED_OK`)
+
+2. **Impact Proof without Destruction**:
+   All state-changing endpoints are non-destructive and verify impact through canary events logged to `/debug`.

@@ -1,7 +1,6 @@
 {
   "version": 2,
-  "cleanUrls": true,
-  "trailingSlash": false,
+  "framework": "nextjs",
   "headers": [
     {
       "source": "/(.*)",
@@ -24,23 +23,9 @@
         },
         {
           "key": "Access-Control-Allow-Methods",
-          "value": "GET, POST, OPTIONS, TRACE"
+          "value": "GET, POST, PUT, DELETE, OPTIONS, TRACE"
         }
       ]
-    }
-  ],
-  "routes": [
-    {
-      "src": "/openapi.json",
-      "dest": "/openapi.json"
-    },
-    {
-      "src": "/swagger.json",
-      "dest": "/swagger.json"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
     }
   ]
 }
