@@ -56,6 +56,7 @@ Pre-configured in-memory accounts for testing authenticated access-control playb
 | **V1 (Encoding / Injection)** | Server SSR `/?q=` & `/search` | Raw unescaped reflection in server-rendered body | Canary reflected in HTML |
 | **V1 (SSTI)** | `/?template={{7*7}}` | Server template engine simulation | Evaluates expression to `49` |
 | **V1 / V16 (SQL Injection)** | `GET /api/users?id='` | Unsanitized query triggering raw SQLite traceback | `sqlite3.OperationalError: unrecognized token: "'"` |
+| **V1 / V6 (SQLi Login Bypass)** | `POST /api/auth/login` | Login query interpolates username/password; comment tokens bypass the password predicate | `CANARY_SQLI_LOGIN_BYPASS_PROVEN`, `adminStatus: is_admin`, admin session cookie |
 | **V1 (SQLi Dump Bypass)** | `GET /api/users?id=' OR 1=1--` | Classic boolean SQLi bypass dumping database | `CANARY_SQLI_BYPASS_PROVEN` |
 | **V1 (Command Injection)** | `GET /api/tools/ping?host=127.0.0.1; whoami` | Shell command injection separator execution | `CANARY_COMMAND_INJECTION_PROVEN` |
 | **V1 (XXE)** | `POST /api/xml/parse` | XML parser with external entity expansion | `CANARY_XXE_ENTITY_EXPANSION_VERIFIED` |

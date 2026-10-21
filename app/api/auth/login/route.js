@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getUserByUsername, createSession, logCanary } from '@/lib/db';
+import { authenticateUser, createSession, logCanary } from '@/lib/db';
 import { createJwt } from '@/lib/jwt';
 
 export async function POST(request) {
@@ -18,9 +18,10 @@ export async function POST(request) {
       password = formData.get('password') || '';
     }
 
-    const user = getUserByUsername(username);
+    const auth = authenticateUser(username, password);
+    const user = auth.user;
 
-    if (!user || user.password !== password) {
+    if (!user) {
       return NextResponse.json(
         {
           success: false,
@@ -32,7 +33,12 @@ export async function POST(request) {
     }
 
     // Create session in state store
-    const sessionId = createSession(user.id, user.role, user.username);
+    const sessionId = createSession(
+      user.id,
+      user.role,
+      user.username,
+      auth.injected ? 'sqli' : 'password'
+    );
     const token = createJwt({
       sub: user.id,
       username: user.username,
@@ -46,11 +52,14 @@ export async function POST(request) {
       username: user.username,
       role: user.role,
       sessionId,
+      sqlInjection: auth.injected,
     });
 
     const response = NextResponse.json({
       success: true,
-      message: 'Authentication successful',
+      message: auth.injected
+        ? 'Authentication successful via SQL injection login bypass'
+        : 'Authentication successful',
       user: {
         id: user.id,
         username: user.username,
@@ -61,8 +70,12 @@ export async function POST(request) {
       token,
       sessionId,
       role: user.role,
-      canary: 'CANARY_AUTH_LOGIN_SUCCESS',
+      canary: auth.injected
+        ? 'CANARY_SQLI_LOGIN_BYPASS_PROVEN'
+        : 'CANARY_AUTH_LOGIN_SUCCESS',
       adminStatus: user.role === 'admin' ? 'is_admin' : 'standard_user',
+      sqlInjection: auth.injected,
+      sqlQuery: auth.query,
     });
 
     // Insecure Cookie Flags (ASVS V7.1.1): Lacks HttpOnly, Secure, SameSite
@@ -93,12 +106,18 @@ export async function GET(request) {
     });
   }
 
-  const user = getUserByUsername(username);
-  if (!user || user.password !== password) {
+  const auth = authenticateUser(username, password);
+  const user = auth.user;
+  if (!user) {
     return NextResponse.json({ success: false, error: 'Invalid credentials' }, { status: 401 });
   }
 
-  const sessionId = createSession(user.id, user.role, user.username);
+  const sessionId = createSession(
+    user.id,
+    user.role,
+    user.username,
+    auth.injected ? 'sqli' : 'password'
+  );
   const token = createJwt({
     sub: user.id,
     username: user.username,
@@ -108,7 +127,9 @@ export async function GET(request) {
 
   const response = NextResponse.json({
     success: true,
-    message: 'Authentication successful via GET query string (Insecure Transport Leak)',
+    message: auth.injected
+      ? 'Authentication successful via SQL injection login bypass (GET query string)'
+      : 'Authentication successful via GET query string (Insecure Transport Leak)',
     user: {
       id: user.id,
       username: user.username,
@@ -117,7 +138,13 @@ export async function GET(request) {
     },
     token,
     sessionId,
-    canary: 'CANARY_AUTH_LOGIN_GET_SUCCESS',
+    role: user.role,
+    adminStatus: user.role === 'admin' ? 'is_admin' : 'standard_user',
+    canary: auth.injected
+      ? 'CANARY_SQLI_LOGIN_BYPASS_PROVEN'
+      : 'CANARY_AUTH_LOGIN_GET_SUCCESS',
+    sqlInjection: auth.injected,
+    sqlQuery: auth.query,
   });
 
   response.headers.set('Set-Cookie', `session_id=${sessionId}; Path=/; Max-Age=86400`);

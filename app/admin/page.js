@@ -53,6 +53,10 @@ export default async function AdminPage({ searchParams }) {
             <div>Context: <strong>admin panel</strong> unlocked</div>
             <div>Telemetry: <strong>dashboard</strong> feed initialized</div>
             <div>Role Flag: <strong>is_admin</strong></div>
+            <div>Authenticated Operator: <strong>{sessionUser?.username || 'role_parameter'}</strong></div>
+            {sessionUser?.source === 'sqli' && (
+              <div>Authentication Vector: <strong>SQL injection login bypass</strong></div>
+            )}
             <div>Master Bypass API Key: <span style={{ color: '#6ee7b7' }}>sk_live_admin_bypass_9938</span></div>
             <div>Canary Token: <span style={{ color: '#a7f3d0' }}>CANARY_ADMIN_TAKEOVER_PROVEN</span></div>
           </div>

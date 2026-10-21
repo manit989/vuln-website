@@ -256,6 +256,16 @@ export default async function HomePage({ searchParams }) {
             </button>
           </form>
 
+          <div className="terminal-box">
+            <div className="terminal-header">
+              <span>SQL INJECTION LOGIN BYPASS (ASVS V1.2.1 / V6.2.1)</span>
+            </div>
+            <div>Vulnerable query: <code>SELECT * FROM users WHERE username = &apos;USERNAME&apos; AND password = &apos;PASSWORD&apos;</code></div>
+            <div>Try username: <code>admin&apos; -- </code></div>
+            <div>Or username: <code>&apos; OR &apos;1&apos;=&apos;1&apos; -- </code></div>
+            <div>On success the session cookie is issued with the selected role. Admin sessions can open <a href="/admin" className="test-link">/admin</a>.</div>
+          </div>
+
           {/* Insecure HTTP link and Sensitive query key leak (ASVS V6.3.1, V12.2.1) */}
           <div style={{ marginTop: '0.85rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
             <a href="http://insecure-auth-gateway.internal/api/login" className="test-link" id="link-cleartext-http">

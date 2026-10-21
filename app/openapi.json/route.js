@@ -21,7 +21,8 @@ export async function GET() {
     paths: {
       "/api/auth/login": {
         post: {
-          summary: "Authenticate user and issue session cookie",
+          summary: "Authenticate user and issue session cookie (SQLi-vulnerable login query)",
+          description: "The login query interpolates username and password without parameterization. Comment payloads such as \"admin' -- \" bypass the password predicate and issue an admin session cookie; generic \"' OR '1'='1' -- \" selects the first account.",
           parameters: [
             { name: "username", in: "query", schema: { type: "string" }, description: "Insecure URL query parameter fallback" },
             { name: "password", in: "query", schema: { type: "string" } }
